@@ -15,8 +15,6 @@ app.get("/", (req, res) => {
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.frd0xwu.mongodb.net/?retryWrites=true&w=majority`;
 
-
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -33,18 +31,27 @@ async function run() {
     const brandCollection = client.db("brandDB").collection("brand");
     const userCollection = client.db("brandDB").collection("user");
 
-
     //And brand  products related apis
 
     app.get("/brand", async (req, res) => {
-        const cursor = brandCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
-      });
-
-
+      const cursor = brandCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // user related apis
+    app.get("/user", async (req, res) => {
+      const cursor = userCollection.find();
+      const users = await cursor.toArray();
+      res.send(users);
+    });
+
+    app.post("/user", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
