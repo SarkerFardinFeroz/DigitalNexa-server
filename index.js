@@ -29,15 +29,32 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const brandCollection = client.db("brandDB").collection("brand");
+    const productsCollection = client.db("brandDB").collection("products");
     const userCollection = client.db("brandDB").collection("user");
 
-    //And brand  products related apis
+    // brand related apis
 
     app.get("/brand", async (req, res) => {
       const cursor = brandCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
+ 
+
+    // products related apis
+
+    app.get("/products", async (req, res) => {
+      const cursor = productsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.post("/products", async (req, res) => {
+      const newProduct = req.body;
+      console.log(newProduct);
+      const result = await productsCollection.insertOne(newProduct);
+      res.send(result);
+    });
+
 
     // user related apis
     app.get("/user", async (req, res) => {
