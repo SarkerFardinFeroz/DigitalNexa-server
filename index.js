@@ -39,22 +39,36 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
- 
 
     // products related apis
 
+    app.get("/products/:brand", async (req, res) => {
+      const brand = req.params.brand;
+      const query = { brand: brand };
+      const cursor = productsCollection.find(query);
+      const result = await cursor.toArray()
+      res.send(result)
+
+    });
     app.get("/products", async (req, res) => {
       const cursor = productsCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post("/products", async (req, res) => {
       const newProduct = req.body;
       console.log(newProduct);
       const result = await productsCollection.insertOne(newProduct);
       res.send(result);
     });
-
 
     // user related apis
     app.get("/user", async (req, res) => {
