@@ -27,11 +27,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const brandCollection = client.db("brandDB").collection("brand");
     const productsCollection = client.db("brandDB").collection("products");
+    const cartCollection = client.db("brandDB").collection("userCart");
     const userCollection = client.db("brandDB").collection("user");
-
+    
     // brand related apis
 
     app.get("/brand", async (req, res) => {
@@ -46,9 +47,8 @@ async function run() {
       const brand = req.params.brand;
       const query = { brand: brand };
       const cursor = productsCollection.find(query);
-      const result = await cursor.toArray()
-      res.send(result)
-
+      const result = await cursor.toArray();
+      res.send(result);
     });
     app.get("/products", async (req, res) => {
       const cursor = productsCollection.find();
@@ -62,7 +62,25 @@ async function run() {
       const result = await productsCollection.findOne(query);
       res.send(result);
     });
-
+    app.put("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedProduct = req.body;
+      const product = {
+        $set: {
+          name: updatedProduct.name,
+          category: updatedProduct.category,
+          price: updatedProduct.price,
+          rating: updatedProduct.rating,
+          short_description: updatedProduct.short_description,
+          image: updatedProduct.image,
+          brand: updatedProduct.brand,
+        },
+      };
+      const result = await productsCollection.updateOne(filter, product);
+      res.send(result);
+    });
     app.post("/products", async (req, res) => {
       const newProduct = req.body;
       console.log(newProduct);
@@ -76,13 +94,40 @@ async function run() {
       const users = await cursor.toArray();
       res.send(users);
     });
-
+ 
     app.post("/user", async (req, res) => {
       const user = req.body;
       console.log(user);
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+
+
+
+
+    
+    app.get("/cart", async (req, res) => {
+      const cursor = cartCollection.find();
+      const users = await cursor.toArray();
+      res.send(users);
+    });
+ 
+    app.post("/cart", async (req, res) => {
+      const cartProduct = req.body;
+      const result = await cartCollection.insertOne(cartProduct);
+      res.send(result);
+    });
+   
+   
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+ 
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
